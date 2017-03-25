@@ -643,22 +643,25 @@ proc createAUVTrack {} {
 		set y_next [ $node_next getLongitude_ ]
 		set z_next [ $node_next getAltitude_ ]
 		puts "debug: ho recuperato tutti i nodi"
-		puts "Posizione attuale $x $y $z"
-		puts "Posizione precedente $x_prev $y_prev $z_prev"
-		puts "Posizione successiva $x_next $y_next $z_next"
+		puts "debug: Posizione attuale $x $y $z"
+		puts "debug: Posizione precedente $x_prev $y_prev $z_prev"
+		puts "debug: Posizione successiva $x_next $y_next $z_next"
 		#calcolo l'angolo compreso, utilizzando il prodotto scalare fra due vettori x*y = |x|*|y|*cos a (proiettandoli sul piano x-y)
 		#in modo da potermi ricavare l'angolo a (che e' l'angolo di rotazione dell'UAV)
 		#calcolo il modulo del primo vettore
-		set distance [ woss_utilities getCartDistance $x $y 0 $x_prev $y_prev 0 ]
-		puts "debug: calcolata prima distanza"
+		#set distance [ $woss_utilities getCartDistance $x $y 1 $x_prev $y_prev 1 ]
+		set distance [ expr sqrt( ($x-$x_prev)*($x-$x_prev) + ($y -$y_prev)*($y-$y_prev)) ]
+		puts "debug: calcolata prima distanza $distance"
 		#calcolo il modulo del secondo vettore
-		set distance2 [ woss_utilities getCartDistance $x $y 0 $x_next $y_next 0]
-		puts "debug: calcolata seconda distanza "
+		#set distance2 [ $woss_utilities getCartDistance $x $y [expr 1] $x_next $y_next [expr 1] ]
+		set distance2 [ expr sqrt( ($x-$x_next)*($x-$x_next) + ($y -$y_next)*($y-$y_next)) ]
+		puts "debug: calcolata seconda distanza  $distance2"
 		#calcolo il coseno dell'angolo compreso ( cos a = (x*y)/(|x|*|y|) )
 		#per il calcolo del prodotto scalare fra due vettori v e u , v*u = v.x * u.x + v.y * u.y
 		set angle [ expr (($x-$x_prev)*($x_next - $x)+($y-$y_prev)*($y_next-$y))/($distance2*$distance) ]
 		#calcolo l'angolo
 		set angle [ expr acos($angle) ]
+		puts "debug: calcolato angolo in radianti $angle"
 
 
 
@@ -672,22 +675,23 @@ proc createAUVTrack {} {
 			set y_int [ expr $y_prev ]
 			set z_int [ expr $z ]
 			$position_($auv_id) addWayPoint $x_int $y_int $z_int $vertical_speed 0.0
-			puts "Aggiunto waypoint intermedio $x_int $y_int $z_int"
+			puts "debug: Aggiunto waypoint intermedio $x_int $y_int $z_int"
 		}
 		#aggiungo il waypoint per il punto analizzato
 		#se e' l'ultimo punto, aggiungo il loop
+		puts "debug: Tempo impiegato per la rotazione [ expr $angle/$angular_speed ]"
 		if { $i == $length -1 } {
 			set toa [ $position_($auv_id) addLoopPoint $x $y $z $speed [ expr $angle/$angular_speed] 0 100 ]
-			puts "Aggiunto waypoint finale $x $y $z "
+			puts "debug: Aggiunto waypoint finale $x $y $z "
 		} elseif { $i == 0 } {
 			set toa [ $position_($auv_id) addStartWayPoint $x $y $z $speed [ expr $angle/$angular_speed ] ]  
-			puts "Aggiunto waypoint iniziale $x $y $z"
+			puts "debug: Aggiunto waypoint iniziale $x $y $z"
 		} else {
 			set toa [ $position_($auv_id) addWayPoint $x $y $z $speed [ expr $angle/$angular_speed ] ] 
-			puts "Aggiunto waypoint $x $y $z"
+			puts "debug: Aggiunto waypoint $x $y $z"
 		}
 			
-		puts "Waypoint $i Posizione $waypoints($i)  Tempo d'arrivo  $toa"
+		puts "debug: Waypoint $i Posizione $waypoints($i)  Tempo d'arrivo  $toa"
 
 	}	
 	
