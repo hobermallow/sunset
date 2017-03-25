@@ -592,7 +592,7 @@ proc printAuvPosition { tempo } {
 }
 proc createAUVTrack {} {
 
-	global waypoints position_ params speed vertical_speed angular_speed
+	global waypoints position_ params speed vertical_speed angular_speed woss_utilities
 	global waypoints_delay
 
 	#imposto l'id del nodo mobile
@@ -646,12 +646,18 @@ proc createAUVTrack {} {
 		puts "Posizione attuale $x $y $z"
 		puts "Posizione precedente $x_prev $y_prev $z_prev"
 		puts "Posizione successiva $x_next $y_next $z_next"
-		#calcolo l'angolo compreso
-		set distance [ expr sqrt(($x - $x_prev)*($x - $x_prev) + ($y - $y_prev)*($y-$y_prev)) ]
+		#calcolo l'angolo compreso, utilizzando il prodotto scalare fra due vettori x*y = |x|*|y|*cos a (proiettandoli sul piano x-y)
+		#in modo da potermi ricavare l'angolo a (che e' l'angolo di rotazione dell'UAV)
+		#calcolo il modulo del primo vettore
+		set distance [ woss_utilities getCartDistance $x $y 0 $x_prev $y_prev 0 ]
 		puts "debug: calcolata prima distanza"
-		set distance2 [ expr sqrt(($x-$x_next)*($x-$x_next) + ($y-$y_next)*($y-$y_next)) ]
+		#calcolo il modulo del secondo vettore
+		set distance2 [ woss_utilities getCartDistance $x $y 0 $x_next $y_next 0]
 		puts "debug: calcolata seconda distanza "
+		#calcolo il coseno dell'angolo compreso ( cos a = (x*y)/(|x|*|y|) )
+		#per il calcolo del prodotto scalare fra due vettori v e u , v*u = v.x * u.x + v.y * u.y
 		set angle [ expr (($x-$x_prev)*($x_next - $x)+($y-$y_prev)*($y_next-$y))/($distance2*$distance) ]
+		#calcolo l'angolo
 		set angle [ expr acos($angle) ]
 
 
