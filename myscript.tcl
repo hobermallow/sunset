@@ -507,14 +507,16 @@ proc createAUVTrack {} {
 		set x_true [ expr $x ]
 		set y_true [ expr $y ]
 		set z_true [ expr $z ]
-		puts "DEBUG coordinate del nodo analizzato $x $y $z"
-		puts "DEBUG coordinate trasformate del nodo analizzato $x_true $y_true $z_true"
-
-		#converto le coordinate geografiche in coordinate cartesiane
+				#converto le coordinate geografiche in coordinate cartesiane
 		array set coords [ lla2ecef $x $y $z ]
 		set x [ expr $coords(0) ]
 		set y [ expr $coords(1) ]
 		set z [ expr $coords(2) ]
+
+		puts "DEBUG coordinate trasformate del nodo analizzato $x $y $z"
+		puts "DEBUG coordinate del nodo analizzato $x_true $y_true $z_true"
+
+
 		
 		#setto il secondo nodo, che e' il nodo precedente
 		if { $i == 0 } {
@@ -984,7 +986,7 @@ if { $params(useStat) == 1 } {
 ###################
 
 puts "\nSimulating...\n"
-
+printAuvPosition 40
 $ns at [expr $params(end_traffic) + 1000.0]  "endModule"
 $ns at [expr $params(end_traffic) + 1003.0]  "finish"
 
